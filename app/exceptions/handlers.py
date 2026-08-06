@@ -7,7 +7,7 @@ from app.exceptions.base import AppException
 
 def register_exception_handlers(app: FastAPI):
     @app.exception_handler(AppException)
-    def app_exception_handler(request: Request, exc: AppException):
+    async def app_exception_handler(request: Request, exc: AppException):
 
         logger.error(
             "Exception on %s %s: %s",
