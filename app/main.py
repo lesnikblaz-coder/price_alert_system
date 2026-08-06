@@ -13,6 +13,10 @@ app = FastAPI()
 register_exception_handlers(app)
 
 
+@app.get("/", include_in_schema=False)
+def root() -> dict[str, str]:
+    return {"status": "ok"}
+
 @app.post("/auth/login", response_model=schemas.TokenResponse)
 async def login(
         service: AuthServiceDep,
