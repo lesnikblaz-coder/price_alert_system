@@ -27,6 +27,8 @@ UserRepoDep = Annotated[UserRepository, Depends(get_user_repository)]
 async def get_auth_service(user_repo: UserRepoDep) -> AuthService:
     return AuthService(user_repo)
 
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
+
 
 TokenDep = Annotated[str, Depends(auth.oauth2_scheme)]
 
