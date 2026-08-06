@@ -30,9 +30,9 @@ class AlertRepository:
 
         return result.scalars().all()
 
-    async def get_all_active(self) -> Sequence[Alert]:
+    async def get_active_by_symbol(self, symbol: str) -> Sequence[Alert]:
         result = await self.session.execute(
-            select(Alert)
+            select(Alert).where(Alert.symbol == symbol)
         )
 
         return result.scalars().all()
