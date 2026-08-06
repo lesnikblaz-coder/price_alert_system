@@ -46,13 +46,3 @@ class AuthService:
         return TokenResponse(
             access_token=auth.get_token(user.id)
         )
-
-    async def get_current_user(self, token: str) -> User:
-        user_id = auth.decode_token(token)
-
-        user = await self.repo.get_by_id(user_id)
-
-        if not user:
-            raise custom.InvalidCredentialsError()
-
-        return user

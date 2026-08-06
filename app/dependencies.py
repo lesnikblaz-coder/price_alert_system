@@ -2,11 +2,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from typing import Annotated
 
+from app import auth
 from app.database import AsyncSessionLocal
 from app.repositories.user_repo import UserRepository
 from app.services.auth_services import AuthService
 from app.models import User
-from app.auth import oauth2_scheme
+from app.exceptions import custom
 
 
 async def get_session():
@@ -26,13 +27,17 @@ UserRepoDep = Annotated[UserRepository, Depends(get_user_repository)]
 async def get_auth_service(user_repo: UserRepoDep) -> AuthService:
     return AuthService(user_repo)
 
-AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 
-
-TokenDep = Annotated[str, Depends(oauth2_scheme)]
+TokenDep = Annotated[str, Depends(auth.oauth2_scheme)]
 
 async def get_current_user(
-        service: AuthServiceDep,
+        user_repo: UserRepoDep,
         token: TokenDep
 ) -> User:
-    return await service.get_current_user(token)
+    user_id = auth.decode_token(token)
+    user = await user_repo.get_by_id(user_id)
+    if not user:
+        raise custom.InvalidCredentialsError()
+    return user
+
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
