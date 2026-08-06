@@ -20,4 +20,4 @@ class AlertCondition(StrEnum):
     CROSSES_BELOW = "crosses_below"  # crosses from above to below
 
 class TokenType(StrEnum):
-    BEARER = "bearer"
+    BEARER = "Bearer"
