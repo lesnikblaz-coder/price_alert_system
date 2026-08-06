@@ -12,3 +12,7 @@ class InvalidCredentialsError(AppException):
 class UserNotFoundError(AppException):
     status_code = 404
     detail = "User not found."
+
+class DuplicateEmailError(AppException):
+    status_code = 409
+    detail = "Email already in use."
