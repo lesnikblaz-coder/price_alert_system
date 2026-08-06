@@ -19,5 +19,10 @@ class AlertCondition(StrEnum):
     CROSSES_ABOVE = "crosses_above"  # crosses from below to above
     CROSSES_BELOW = "crosses_below"  # crosses from above to below
 
+class AlertStatus(StrEnum):
+    ACTIVE = "active"
+    TRIGGERED = "triggered"
+    CANCELLED = "cancelled"
+
 class TokenType(StrEnum):
     BEARER = "Bearer"

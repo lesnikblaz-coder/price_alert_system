@@ -6,7 +6,7 @@ from decimal import Decimal
 from datetime import datetime
 
 from app.database import Base
-from app.enums import UserRole, AlertCondition
+from app.enums import UserRole, AlertCondition, AlertStatus
 
 
 class User(Base):
@@ -26,13 +26,11 @@ class Alert(Base):
 
     id: Mapped[UUID] = mapped_column(SQLUUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(SQLUUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    symbol: Mapped[str] = mapped_column(String, nullable= False, index=True)
+    symbol: Mapped[str] = mapped_column(String, nullable=False, index=True)
     condition: Mapped[AlertCondition] = mapped_column(Enum(AlertCondition), nullable=False)
     target_price: Mapped[Decimal] = mapped_column(DECIMAL(precision=12, scale=4), nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     triggered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[AlertStatus] = mapped_column(Enum(AlertStatus), nullable=False, default=AlertStatus.ACTIVE)
 
     user: Mapped["User"] = relationship(back_populates="alerts")
-
-
