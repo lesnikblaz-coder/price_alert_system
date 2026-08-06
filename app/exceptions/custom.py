@@ -16,3 +16,7 @@ class UserNotFoundError(AppException):
 class DuplicateEmailError(AppException):
     status_code = 409
     detail = "Email already in use."
+
+class AlertNotFoundError(AppException):
+    status_code = 404
+    detail = "Alert not found."
