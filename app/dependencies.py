@@ -1,15 +1,12 @@
-import jwt
-
-from jwt import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from typing import Annotated
-from uuid import UUID
 
-from app.auth import oauth2_scheme, SECRET_KEY, ALGORITHM
 from app.database import AsyncSessionLocal
-from app.exceptions import custom
 from app.repositories.user_repo import UserRepository
+from app.services.auth_services import AuthService
+from app.models import User
+from app.auth import oauth2_scheme
 
 
 async def get_session():
@@ -18,27 +15,24 @@ async def get_session():
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
-async def get_user_repository(session: SessionDep):
+
+async def get_user_repository(session: SessionDep) -> UserRepository:
     return UserRepository(session)
 
 UserRepoDep = Annotated[UserRepository, Depends(get_user_repository)]
 
-async def get_current_user(user_repo: UserRepoDep, token: str = Depends(oauth2_scheme)):
-    try:
 
-        decoded_payload = jwt.decode(
-            jwt=token,
-            key=SECRET_KEY,
-            algorithms=[ALGORITHM]
-        )
 
-        user_id: UUID = decoded_payload["sub"]
+async def get_auth_service(user_repo: UserRepoDep) -> AuthService:
+    return AuthService(user_repo)
 
-    except(InvalidTokenError, KeyError, ValueError):
-        raise custom.InvalidTokenError()
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 
-    user = await user_repo.get_by_id(user_id)
-    if not user:
-        raise custom.InvalidCredentialsError()
 
-    return user
+TokenDep = Annotated[str, Depends(oauth2_scheme)]
+
+async def get_current_user(
+        service: AuthServiceDep,
+        token: TokenDep
+) -> User:
+    return await service.get_current_user(token)
