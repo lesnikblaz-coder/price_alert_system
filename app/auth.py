@@ -8,6 +8,8 @@ from pathlib import Path
 from fastapi.security import OAuth2PasswordBearer
 from uuid import UUID
 
+from app.exceptions import custom
+
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
 secret_key = os.getenv("SECRET_KEY")
@@ -41,3 +43,16 @@ def get_token(user_id: UUID) -> str:
         key=SECRET_KEY,
         algorithm=ALGORITHM
     )
+
+def decode_token(token: str) -> UUID:
+    try:
+        payload = jwt.decode(
+            jwt=token,
+            key=SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+
+        return UUID(payload["sub"])
+
+    except(jwt.InvalidTokenError, KeyError, ValueError):
+        raise custom.InvalidTokenError()
