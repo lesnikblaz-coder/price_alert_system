@@ -4,6 +4,7 @@ from uuid import UUID
 from collections.abc import Sequence
 
 from app.models import Alert
+from app.enums import AlertStatus
 
 
 class AlertRepository:
@@ -16,7 +17,11 @@ class AlertRepository:
         await self.session.refresh(alert)
         return alert
 
-    async def get_by_id(self, alert_id: UUID, user_id: UUID) -> Alert | None:
+    async def get_by_id(
+            self,
+            alert_id: UUID,
+            user_id: UUID
+    ) -> Alert | None:
         result = await self.session.execute(
             select(Alert).where(
                 Alert.id == alert_id,
@@ -35,12 +40,18 @@ class AlertRepository:
 
     async def get_active_by_symbol(self, symbol: str) -> Sequence[Alert]:
         result = await self.session.execute(
-            select(Alert).where(Alert.symbol == symbol)
+            select(Alert).where(
+                Alert.symbol == symbol,
+                Alert.status == AlertStatus.ACTIVE
+            )
         )
 
         return result.scalars().all()
 
-    async def deactivate(self, alert: Alert) -> Alert:
+    async def delete_by_id(
+            self,
+            alert: Alert
+    ) -> Alert:
         await self.session.delete(alert)
         await self.session.commit()
         return alert

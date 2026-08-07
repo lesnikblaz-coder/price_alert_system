@@ -39,8 +39,9 @@ class AlertService:
         return await self.repo.create(alert)
 
     async def get_active_by_symbol(self, symbol: str) -> list[Alert]:
-        return list(
-            await self.repo.get_active_by_symbol(
-                symbol
-            )
-        )
+        return list(await self.repo.get_active_by_symbol(symbol))
+
+    async def delete_by_id(self, alert_id: UUID, user_id: UUID) -> Alert:
+        alert = await self.get_by_id(alert_id, user_id)
+
+        return await self.repo.delete_by_id(alert)

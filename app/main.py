@@ -69,7 +69,7 @@ async def get_alerts(
 async def create_alert(
         service: AlertServiceDep,
         user: CurrentUserDep,
-        request: schemas.AlertRequest = Depends()
+        request: schemas.AlertRequest
 ) -> Alert:
     return await service.create(
         user_id=user.id,
@@ -78,13 +78,24 @@ async def create_alert(
         target_price=request.target_price
     )
 
-@app.get("/alerts/{id}", response_model=schemas.AlertResponse)
+@app.get("/alerts/{alert_id}", response_model=schemas.AlertResponse)
 async def get_alert_by_id(
         alert_id: UUID,
         service: AlertServiceDep,
         user: CurrentUserDep
 ) -> Alert:
     return await service.get_by_id(
+        alert_id=alert_id,
+        user_id=user.id
+    )
+
+@app.delete("/alerts/{alert_id}", response_model=schemas.AlertResponse)
+async def delete_alert_by_id(
+        alert_id: UUID,
+        service: AlertServiceDep,
+        user: CurrentUserDep
+) -> Alert:
+    return await service.delete_by_id(
         alert_id=alert_id,
         user_id=user.id
     )
