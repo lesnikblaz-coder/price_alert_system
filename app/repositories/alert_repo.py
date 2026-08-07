@@ -16,9 +16,12 @@ class AlertRepository:
         await self.session.refresh(alert)
         return alert
 
-    async def get_by_id(self, alert_id: UUID) -> Alert | None:
+    async def get_by_id(self, alert_id: UUID, user_id: UUID) -> Alert | None:
         result = await self.session.execute(
-            select(Alert).where(Alert.id == alert_id)
+            select(Alert).where(
+                Alert.id == alert_id,
+                Alert.user_id == user_id
+            )
         )
 
         return result.scalar_one_or_none()
