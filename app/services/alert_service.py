@@ -14,8 +14,8 @@ class AlertService:
     async def get_by_user(self, user_id: UUID) -> list[Alert]:
         return list(await self.repo.get_by_user(user_id))
 
-    async def get_by_id(self, alert_id: UUID) -> Alert:
-        alert = await self.repo.get_by_id(alert_id)
+    async def get_by_id(self, alert_id: UUID, user_id: UUID) -> Alert:
+        alert = await self.repo.get_by_id(alert_id, user_id)
 
         if not alert:
             raise custom.AlertNotFoundError()

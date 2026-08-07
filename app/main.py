@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -75,4 +76,15 @@ async def create_alert(
         symbol=request.symbol,
         condition=request.condition,
         target_price=request.target_price
+    )
+
+@app.get("/alerts/{id}", response_model=schemas.AlertResponse)
+async def get_alert_by_id(
+        alert_id: UUID,
+        service: AlertServiceDep,
+        user: CurrentUserDep
+) -> Alert:
+    return await service.get_by_id(
+        alert_id=alert_id,
+        user_id=user.id
     )
