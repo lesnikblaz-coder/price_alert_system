@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from collections.abc import Sequence
+from datetime import datetime, timezone
 
 from app.models import Alert
 from app.enums import AlertStatus
@@ -48,10 +49,13 @@ class AlertRepository:
 
         return result.scalars().all()
 
-    async def delete_by_id(
-            self,
-            alert: Alert
-    ) -> Alert:
-        await self.session.delete(alert)
+    async def update_status(self, alert: Alert, status: AlertStatus) -> Alert:
+        alert.status = status
+
+        if status == AlertStatus.TRIGGERED:
+            alert.triggered_at = datetime.now(timezone.utc)
+
         await self.session.commit()
+        await self.session.refresh(alert)
+
         return alert

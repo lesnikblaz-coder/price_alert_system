@@ -6,6 +6,7 @@ from app import schemas
 from app.dependencies import AuthServiceDep, CurrentUserDep, AlertServiceDep
 from app.exceptions.handlers import register_exception_handlers
 from app.models import Alert
+from app.enums import AlertStatus
 
 
 # app lifespan
@@ -90,12 +91,13 @@ async def get_alert_by_id(
     )
 
 @app.delete("/alerts/{alert_id}", response_model=schemas.AlertResponse)
-async def delete_alert_by_id(
+async def deactivate_alert(
         alert_id: UUID,
         service: AlertServiceDep,
         user: CurrentUserDep
 ) -> Alert:
-    return await service.delete_by_id(
+    return await service.update_status(
         alert_id=alert_id,
-        user_id=user.id
+        user_id=user.id,
+        status=AlertStatus.CANCELLED
     )
