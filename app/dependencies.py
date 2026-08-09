@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
+from fastapi import Depends, Request
 from typing import Annotated
 
 from app import auth
@@ -10,6 +10,8 @@ from app.services.auth_services import AuthService
 from app.services.alert_service import AlertService
 from app.models import User
 from app.exceptions import custom
+from app.clients.price_client import PriceClient
+from app.services.price_service import PriceService
 
 
 
@@ -59,3 +61,16 @@ async def get_current_user(
     return user
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
+
+
+# ---------- Clients ----------
+async def get_price_client(request: Request) -> PriceClient:
+    return PriceClient(request.app.state.http_client)
+
+PriceClientDep = Annotated[PriceClient, Depends(get_price_client)]
+
+
+async def get_price_service(client: PriceClientDep):
+    return PriceService(client)
+
+PriceServiceDep = Annotated[PriceService, Depends(get_price_service)]
