@@ -1,22 +1,14 @@
 import jwt
-import os
 
 from datetime import datetime, timezone, timedelta
 from pwdlib import PasswordHash
-from dotenv import load_dotenv
-from pathlib import Path
 from fastapi.security import OAuth2PasswordBearer
 from uuid import UUID
 
 from app.exceptions import custom
+from app.config import SECRET_KEY
 
 
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-secret_key = os.getenv("SECRET_KEY")
-if not secret_key:
-    raise RuntimeError("SECRET_KEY not found")
-
-SECRET_KEY = secret_key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 
