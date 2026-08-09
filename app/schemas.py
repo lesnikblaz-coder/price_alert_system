@@ -37,3 +37,11 @@ class AlertResponse(BaseModel):
     created_at: datetime
     triggered_at: datetime | None
     status: AlertStatus
+
+
+# ---------- Stock Symbols ----------
+class PriceResponse(BaseModel):
+    price: Decimal = Field(validation_alias="c")
+
+class SymbolRequest(BaseModel):
+    symbol: str = Field(max_length=8)
