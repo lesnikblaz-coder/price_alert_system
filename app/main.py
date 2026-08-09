@@ -1,18 +1,38 @@
+import httpx
+
 from uuid import UUID
 from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+from contextlib import asynccontextmanager
 
 from app import schemas
-from app.dependencies import AuthServiceDep, CurrentUserDep, AlertServiceDep
+from app.dependencies import AuthServiceDep, CurrentUserDep, AlertServiceDep, PriceServiceDep
 from app.exceptions.handlers import register_exception_handlers
 from app.models import Alert
 from app.enums import AlertStatus
+from app.config import FHUB_API_KEY
 
 
-# app lifespan
+@asynccontextmanager
+async def lifespan(lifespan_app: FastAPI):
+    http_client = httpx.AsyncClient(
+            base_url="https://finnhub.io/api/v1",
+            headers={
+                "X-Finnhub-Token": FHUB_API_KEY
+            },
+            timeout=5
+        )
+
+    lifespan_app.state.http_client = http_client
+
+    yield
+
+    await http_client.aclose()
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
+
+
 register_exception_handlers(app)
 
 
@@ -101,3 +121,9 @@ async def deactivate_alert(
         user_id=user.id,
         status=AlertStatus.CANCELLED
     )
+
+
+# ---------- Stock Price ----------
+@app.post("/price", response_model=schemas.PriceResponse)
+async def get_price(request: schemas.SymbolRequest, service: PriceServiceDep):
+    return await service.get_prices(request.symbol)
