@@ -1,0 +1,20 @@
+import httpx
+
+
+class PriceClient:
+    def __init__(self, client: httpx.AsyncClient):
+        self.client = client
+
+    async def get_prices(self, symbol: str):
+        params = {
+            "symbol": symbol
+        }
+
+        response = await self.client.get(
+            url="/quote",
+            params=params
+        )
+
+        response.raise_for_status()
+
+        return response.json()
