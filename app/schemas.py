@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import UUID
 from datetime import datetime
 
-from app.enums import TokenType, AlertCondition, AlertStatus
+from app.enums import TokenType, AlertCondition, AlertStatus, UserRole
 
 
 # ---------- Auth/User ----------
@@ -18,6 +18,12 @@ class RegisterRequest(UserCredentials): ...
 class TokenResponse(BaseModel):
     access_token: str
     token_type: TokenType = Field(default=TokenType.BEARER)
+
+class UserResponse(BaseModel):
+    id: UUID
+    email: EmailStr
+    is_active: bool
+    role: UserRole
 
 
 # ---------- Alert ----------
