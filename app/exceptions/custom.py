@@ -20,3 +20,7 @@ class DuplicateEmailError(AppException):
 class AlertNotFoundError(AppException):
     status_code = 404
     detail = "Alert not found."
+
+class InsufficientPermissions(AppException):
+    status_code = 403
+    detail = "Insufficient permissions."
