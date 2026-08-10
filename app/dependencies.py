@@ -12,7 +12,8 @@ from app.models import User
 from app.exceptions import custom
 from app.clients.price_client import PriceClient
 from app.services.price_service import PriceService
-
+from app.services.user_service import UserService
+from app.enums import UserRole
 
 
 # ---------- Session ----------
@@ -42,9 +43,12 @@ async def get_auth_service(user_repo: UserRepoDep) -> AuthService:
 async def get_alert_service(alert_repo: AlertRepoDep) -> AlertService:
     return AlertService(alert_repo)
 
+async def get_user_service(user_repo: UserRepoDep) -> UserService:
+    return UserService(user_repo)
+
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 AlertServiceDep = Annotated[AlertService, Depends(get_alert_service)]
-
+UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 
 
 # ---------- Auth ----------
@@ -61,6 +65,17 @@ async def get_current_user(
     return user
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
+
+
+def required_roles(*roles):
+    def checker(current_user: CurrentUserDep)  -> User:
+        if current_user.role not in roles:
+            raise custom.InsufficientPermissions()
+        return current_user
+    return checker
+
+AdminLockDep = Annotated[User, Depends(required_roles(UserRole.ADMIN))]
+StaffLockDep = Annotated[User, Depends(required_roles(UserRole.ADMIN, UserRole.STAFF))]
 
 
 # ---------- Clients ----------
