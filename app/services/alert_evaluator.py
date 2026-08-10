@@ -38,6 +38,3 @@ def should_trigger(
             now_below = current_price < alert.target_price
 
             return was_above_or_at and now_below
-
-        case _:
-            return False
