@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
+from collections.abc import Sequence
 
 from app.models import User
 
@@ -40,3 +41,10 @@ class UserRepository:
         )
 
         return result.scalar_one_or_none()
+
+    async def get_users(self) -> Sequence[User]:
+        result = await self.session.execute(
+            select(User)
+        )
+
+        return result.scalars().all()
