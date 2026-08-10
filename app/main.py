@@ -6,9 +6,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from contextlib import asynccontextmanager
 
 from app import schemas
-from app.dependencies import AuthServiceDep, CurrentUserDep, AlertServiceDep, PriceServiceDep
+from app import dependencies
 from app.exceptions.handlers import register_exception_handlers
-from app.models import Alert
+from app.models import Alert, User
 from app.enums import AlertStatus
 from app.config import FHUB_API_KEY
 
@@ -45,7 +45,7 @@ def root() -> dict[str, str]:
 # ---------- Auth ----------
 @app.post("/auth/login", response_model=schemas.TokenResponse)
 async def login(
-        service: AuthServiceDep,
+        service: dependencies.AuthServiceDep,
         request: schemas.LoginRequest
 ) -> schemas.TokenResponse:
     return await service.login(
@@ -55,7 +55,7 @@ async def login(
 
 @app.post("/auth/register", response_model=schemas.TokenResponse)
 async def register(
-        service: AuthServiceDep,
+        service: dependencies.AuthServiceDep,
         request: schemas.RegisterRequest
 ) -> schemas.TokenResponse:
     return await service.register(
@@ -65,7 +65,7 @@ async def register(
 
 @app.post("/auth/token", response_model=schemas.TokenResponse)
 async def token(
-        service: AuthServiceDep,
+        service: dependencies.AuthServiceDep,
         form_data: OAuth2PasswordRequestForm = Depends()
 ) -> schemas.TokenResponse:
     return await service.login(
@@ -75,21 +75,26 @@ async def token(
 
 
 # ---------- Users (admin*) ----------
-#@app.get("/users")
+@app.get("/users", response_model=list[schemas.UserResponse])
+async def get_users(
+        service: dependencies.UserServiceDep,
+        _: dependencies.AdminLockDep
+) -> list[User]:
+    return await service.get_users()
 
 
 # ---------- Alerts ----------
 @app.get("/alerts", response_model=list[schemas.AlertResponse])
 async def get_alerts(
-        service: AlertServiceDep,
-        user: CurrentUserDep
+        service: dependencies.AlertServiceDep,
+        user: dependencies.CurrentUserDep
 ) -> list[Alert]:
     return await service.get_by_user(user.id)
 
 @app.post("/alerts", response_model=schemas.AlertResponse)
 async def create_alert(
-        service: AlertServiceDep,
-        user: CurrentUserDep,
+        service: dependencies.AlertServiceDep,
+        user: dependencies.CurrentUserDep,
         request: schemas.AlertRequest
 ) -> Alert:
     return await service.create(
@@ -102,19 +107,19 @@ async def create_alert(
 @app.get("/alerts/{alert_id}", response_model=schemas.AlertResponse)
 async def get_alert_by_id(
         alert_id: UUID,
-        service: AlertServiceDep,
-        user: CurrentUserDep
+        service: dependencies.AlertServiceDep,
+        user: dependencies.CurrentUserDep
 ) -> Alert:
     return await service.get_by_id(
         alert_id=alert_id,
         user_id=user.id
     )
 
-@app.delete("/alerts/{alert_id}", response_model=schemas.AlertResponse)
+@app.put("/alerts/{alert_id}", response_model=schemas.AlertResponse)
 async def deactivate_alert(
         alert_id: UUID,
-        service: AlertServiceDep,
-        user: CurrentUserDep
+        service: dependencies.AlertServiceDep,
+        user: dependencies.CurrentUserDep
 ) -> Alert:
     return await service.update_status(
         alert_id=alert_id,
@@ -125,5 +130,5 @@ async def deactivate_alert(
 
 # ---------- Stock Price ----------
 @app.post("/price", response_model=schemas.PriceResponse)
-async def get_price(request: schemas.SymbolRequest, service: PriceServiceDep):
+async def get_price(request: schemas.SymbolRequest, service: dependencies.PriceServiceDep):
     return await service.get_prices(request.symbol)
