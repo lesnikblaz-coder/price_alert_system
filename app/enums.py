@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import StrEnum, IntEnum
 
 class UserRole(StrEnum):
     ADMIN = "admin"
@@ -26,3 +26,6 @@ class AlertStatus(StrEnum):
 
 class TokenType(StrEnum):
     BEARER = "Bearer"
+
+class RedisTTL(IntEnum):
+    LAST_PRICE = 300
