@@ -1,21 +1,33 @@
-import os
-
 from pathlib import Path
-from dotenv import load_dotenv
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# FHUB
-FHUB_API_KEY = os.getenv("FHUB_API_KEY")
+class Settings(BaseSettings):
+    db_user: str
+    db_password: str
+    db_host: str
+    db_port: int = 5432
+    db_name: str
 
-if not FHUB_API_KEY:
-    raise RuntimeError("FHUB_API_KEY not found")
+    secret_key: str
+    redis_url: str = "redis://redis:6379"
+    fhub_api_key: str
+    alembic_sync_db_url: str
+
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 15
 
 
-# AUTH
-SECRET_KEY = os.getenv("SECRET_KEY")
+    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
-if not SECRET_KEY:
-    raise RuntimeError("SECRET_KEY not found")
+    @property
+    def database_url(self) -> str:
+        return (
+            f"postgresql+asyncpg://{self.db_user}:{self.db_password}"
+            f"@{self.db_host}:{self.db_port}/{self.db_name}"
+        )
+
+settings = Settings()
