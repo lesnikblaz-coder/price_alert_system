@@ -5,7 +5,7 @@ class PriceClient:
     def __init__(self, client: httpx.AsyncClient):
         self.client = client
 
-    async def get_prices(self, symbol: str):
+    async def get_quote(self, symbol: str):
         params = {
             "symbol": symbol
         }

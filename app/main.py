@@ -131,4 +131,4 @@ async def deactivate_alert(
 # ---------- Stock Price ----------
 @app.post("/price", response_model=schemas.PriceResponse)
 async def get_price(request: schemas.SymbolRequest, service: dependencies.PriceServiceDep):
-    return await service.get_prices(request.symbol)
+    return await service.get_symbol_price(request.symbol)
