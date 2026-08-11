@@ -6,11 +6,8 @@ from fastapi.security import OAuth2PasswordBearer
 from uuid import UUID
 
 from app.exceptions import custom
-from app.config import SECRET_KEY
+from app.config import settings
 
-
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 15
 
 pwd_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
@@ -23,7 +20,7 @@ def verify_pw(plain_pw: str, hashed_pw: str) -> bool:
     return pwd_hash.verify(plain_pw, hashed_pw)
 
 def get_token(user_id: UUID) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
 
     payload = {
         "sub": str(user_id),
@@ -32,16 +29,16 @@ def get_token(user_id: UUID) -> str:
 
     return jwt.encode(
         payload=payload,
-        key=SECRET_KEY,
-        algorithm=ALGORITHM
+        key=settings.secret_key,
+        algorithm=settings.algorithm
     )
 
 def decode_token(token: str) -> UUID:
     try:
         payload = jwt.decode(
             jwt=token,
-            key=SECRET_KEY,
-            algorithms=[ALGORITHM]
+            key=settings.secret_key,
+            algorithms=[settings.algorithm]
         )
 
         return UUID(payload["sub"])

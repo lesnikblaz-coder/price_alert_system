@@ -7,10 +7,10 @@ from contextlib import asynccontextmanager
 
 from app import schemas
 from app import dependencies
+from app.config import settings
 from app.exceptions.handlers import register_exception_handlers
 from app.models import Alert, User
 from app.enums import AlertStatus
-from app.config import FHUB_API_KEY
 
 
 @asynccontextmanager
@@ -18,7 +18,7 @@ async def lifespan(lifespan_app: FastAPI):
     http_client = httpx.AsyncClient(
             base_url="https://finnhub.io/api/v1",
             headers={
-                "X-Finnhub-Token": FHUB_API_KEY
+                "X-Finnhub-Token": settings.fhub_api_key
             },
             timeout=5
         )
