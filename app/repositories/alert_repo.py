@@ -49,6 +49,15 @@ class AlertRepository:
 
         return result.scalars().all()
 
+    async def get_active(self) -> Sequence[Alert]:
+        result = await self.session.execute(
+            select(Alert).where(
+                Alert.status == AlertStatus.ACTIVE
+            )
+        )
+
+        return result.scalars().all()
+
     async def update_status(self, alert: Alert, status: AlertStatus) -> Alert:
         alert.status = status
 
