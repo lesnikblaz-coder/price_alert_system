@@ -1,4 +1,5 @@
 import httpx
+import redis.asyncio as aioredis
 
 from uuid import UUID
 from fastapi import FastAPI, Depends
@@ -14,20 +15,28 @@ from app.enums import AlertStatus
 
 
 @asynccontextmanager
-async def lifespan(lifespan_app: FastAPI):
+async def lifespan(app: FastAPI):
     http_client = httpx.AsyncClient(
-            base_url="https://finnhub.io/api/v1",
-            headers={
-                "X-Finnhub-Token": settings.fhub_api_key
-            },
-            timeout=5
-        )
+        base_url="https://finnhub.io/api/v1",
+        headers={
+            "X-Finnhub-Token": settings.fhub_api_key,
+        },
+        timeout=5,
+    )
 
-    lifespan_app.state.http_client = http_client
+    async_redis = aioredis.from_url(
+        settings.redis_url,
+        decode_responses=True,
+    )
 
-    yield
+    app.state.http_client = http_client
+    app.state.async_redis = async_redis
 
-    await http_client.aclose()
+    try:
+        yield
+    finally:
+        await http_client.aclose()
+        await async_redis.aclose()
 
 
 app = FastAPI(lifespan=lifespan)
