@@ -7,6 +7,7 @@ from app import enums
 from app.repositories.alert_repo import AlertRepository
 from app.services.price_service import PriceService
 from app.services.alert_evaluator import should_trigger
+from app.models import Alert
 
 
 class AlertWorkerService:
@@ -58,14 +59,10 @@ class AlertWorkerService:
                 )
 
                 # Redis publish
-                message = {
-                    "alert_id":str(alert.id),
-                    "user_id":str(alert.user_id),
-                    "symbol":alert.symbol,
-                    "condition":alert.condition.value,
-                    "target_price":str(alert.target_price),
-                    "current_price":str(current_price)
-                }
+                message = self.alert_message(
+                    alert=alert,
+                    current_price=current_price
+                )
 
                 self.redis.publish(
                     f"alert:user:{alert.user_id}",
@@ -76,5 +73,16 @@ class AlertWorkerService:
             self.redis.set(
                 key,
                 str(current_price),
-                ex=int(enums.RedisTTL)
+                ex=enums.RedisTTL.value
             )
+
+    @staticmethod
+    def alert_message(alert: Alert, current_price: Decimal):
+        return {
+                    "alert_id":str(alert.id),
+                    "user_id":str(alert.user_id),
+                    "symbol":alert.symbol,
+                    "condition":alert.condition.value,
+                    "target_price":str(alert.target_price),
+                    "current_price":str(current_price)
+                }
