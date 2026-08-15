@@ -36,7 +36,7 @@ class PriceService:
         return prices
 
     @classmethod
-    async def create(cls, api_key: str) -> "PriceService":
+    def create(cls, api_key: str) -> "PriceService":
         # factory method for when there's no app.state to inject from
         http_client = httpx.AsyncClient(
             base_url="https://finnhub.io/api/v1",
@@ -47,7 +47,7 @@ class PriceService:
         return cls(client=PriceClient(http_client))
 
     async def __aenter__(self):
-        ...
+        return self
 
     async def __aexit__(self, *args):
-        ...
+        await self.client.close()
