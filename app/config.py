@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://redis:6379"
     fhub_api_key: str
     alembic_sync_db_url: str
+    alembic_sync_db_url_postgres: str
 
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 15

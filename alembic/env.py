@@ -12,8 +12,8 @@ from app.database import Base
 from app.models import User, Alert
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
-ALEMBIC_SYNC_DB_URL = os.getenv("ALEMBIC_SYNC_DB_URL")
-if not ALEMBIC_SYNC_DB_URL:
+ALEMBIC_SYNC_DB_URL_POSTGRES = os.getenv("ALEMBIC_SYNC_DB_URL_POSTGRES")
+if not ALEMBIC_SYNC_DB_URL_POSTGRES:
     raise RuntimeError
 
 
@@ -22,7 +22,7 @@ if not ALEMBIC_SYNC_DB_URL:
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", ALEMBIC_SYNC_DB_URL)
+config.set_main_option("sqlalchemy.url", ALEMBIC_SYNC_DB_URL_POSTGRES)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
