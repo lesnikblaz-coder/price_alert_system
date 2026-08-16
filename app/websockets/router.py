@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from redis.asyncio import Redis
 from redis.asyncio.client import PubSub
 
@@ -12,7 +12,7 @@ from app.logging_config import logger
 router = APIRouter()
 
 @router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, token: str):
+async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
     # verify token before accepting
     try:
         user_id = str(decode_token(token))
