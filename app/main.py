@@ -12,6 +12,7 @@ from app.config import settings
 from app.exceptions.handlers import register_exception_handlers
 from app.models import Alert, User
 from app.enums import AlertStatus
+from app.websockets.router import router
 
 
 @asynccontextmanager
@@ -43,6 +44,7 @@ app = FastAPI(lifespan=lifespan)
 
 
 register_exception_handlers(app)
+app.include_router(router)
 
 
 # ---------- Root ----------
